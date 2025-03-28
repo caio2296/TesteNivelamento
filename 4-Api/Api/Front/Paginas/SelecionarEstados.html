@@ -1,0 +1,92 @@
+
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Operadoras</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h2>Consulta de Operadoras por Estado</h2>
+        <label for="estado">Selecione o Estado:</label>
+        <select v-model="estadoSelecionado" @change="buscarOperadoras">
+            <option value="" disabled>Selecione um estado</option>
+            <option v-for="estado in estados" :value="estado">{{ estado }}</option>
+        </select>
+
+        <table v-if="operadoras.length > 0">
+            <thead>
+                <tr>
+                    <th>Registro ANS</th>
+                    <th>CNPJ</th>
+                    <th>Razão Social</th>
+                    <th>Nome Fantasia</th>
+                    <th>Cidade</th>
+                    <th>UF</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="operadora in operadoras" :key="operadora.registro_ans">
+                    <td>{{ operadora.registro_ans }}</td>
+                    <td>{{ operadora.cnpj }}</td>
+                    <td>{{ operadora.razao_social }}</td>
+                    <td>{{ operadora.nome_fantasia }}</td>
+                    <td>{{ operadora.cidade }}</td>
+                    <td>{{ operadora.uf }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p v-if="operadoras.length === 0 && estadoSelecionado">Nenhuma operadora encontrada.</p>
+    </div>
+
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    estados: ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
+                              "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
+                              "RS", "RO", "RR", "SC", "SP", "SE", "TO"],
+                    estadoSelecionado: "",
+                    operadoras: []
+                };
+            },
+            methods: {
+                buscarOperadoras() {
+                    if (!this.estadoSelecionado) return;
+                    axios.get(`http://127.0.0.1:8000/buscar/${this.estadoSelecionado}`)
+                    .then(response => {
+                        console.log(response.data);
+                        this.operadoras = response.data;
+                    })
+                    .catch(error => {
+                        console.error("Erro na requisição:", error);
+                    });
+                }
+            }
+        });
+
+        app.mount("#app");
+    </script>
+</body>
+</html>
